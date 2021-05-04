@@ -20,34 +20,37 @@ const (
 	Walkable
 )
 
-
-func upsizeRoomTo(r Room, h int, w int)Room{
+func upsizeRoomTo(r Room, h int, w int) Room {
 	out := make(Room, h)
-	for i:= 0 ; i<h;i++{
-		out[i]=make([]Bits, w)
-		if i >= len(r){
+	for i := 0; i < h; i++ {
+		out[i] = make([]Bits, w)
+		if i >= len(r) {
 			continue
 		}
 		copy(out[i], r[i])
-	}  
+	}
 	return out
 }
-func max(x,y int)int{
-	if x > y{
+func max(x, y int) int {
+	if x > y {
 		return x
 	}
 	return y
 }
 func (r Room) Stamp(rw int, cl int, bR Room) Room {
 	out := upsizeRoomTo(
-		r, 
-		max(len(r), len(bR)+rw), 
+		r,
+		max(len(r), len(bR)+rw),
 		max(len(r[0]), len(bR[0])+cl),
 	)
-	
-	for i := range bR{
-		for j := range bR[i]{
-			out[i+rw][j+cl]= bR[i][j]
+
+	for i := range bR {
+		for j := range bR[i] {
+			// Avoid overlapping walls by not
+			// overriding floors
+			if !out[i+rw][j+cl].Has(Walkable) {
+				out[i+rw][j+cl] = bR[i][j]
+			}
 		}
 
 	}
@@ -85,8 +88,8 @@ func GenerateRectangle(w int, h int, fill Bits, stroke Bits) Room {
 		} else {
 			tmp := repeatBit(w, fill)
 			tmp[0] = stroke
-			tmp[len(tmp)-1]=stroke
-			out[i]=tmp
+			tmp[len(tmp)-1] = stroke
+			out[i] = tmp
 		}
 
 	}
