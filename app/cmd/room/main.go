@@ -3,13 +3,32 @@ package main
 import (
 	"fmt"
 	"github.com/loupax/roguelike/lib/room"
+	"os"
+	"os/exec"
 )
 
 func main() {
-	// fmt.Println(room.GenerateRectangle(20,10).Render())
-	bg := room.GenerateRectangle(25, 70, room.Walkable, room.Wall)
-	merge := bg.Stamp(10, 5, room.GenerateRectangle(70, 5, room.Walkable, room.Wall))
-	fmt.Println(merge.Render())
-	// fmt.Println(merge.Stamp(5, 5, room.GenerateRectangle(20, 10, room.Walkable, room.Wall)).Render())
-	// fmt.Println(room.GenerateRectangle(20,10, room.Walkable, room.Wall).Stamp(5,5, merge).Render())
+	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
+	seedRoom := room.GenerateRectangle(10, 10, room.Walkable, room.Wall)
+
+	ch := make(chan string)
+	go func(ch chan string) {
+		var s = make([]byte, 1)
+		for {
+			os.Stdin.Read(s)
+			ch <- string(s)
+		}
+	}(ch)
+	ClearEntireScreen()
+	fmt.Println(seedRoom.Render())
+	for {
+		s := <-ch
+		ClearEntireScreen()
+		fmt.Printf("Got input %s\n", s)
+		fmt.Println(seedRoom.Render())
+	}
+}
+
+func ClearEntireScreen() {
+	fmt.Print("\033[H\033[2J")
 }
