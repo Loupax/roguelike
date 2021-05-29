@@ -2,12 +2,16 @@ package room
 
 import (
 	"math"
+	"strings"
 
 	"github.com/loupax/roguelike/lib/cursor"
 )
 
-type Room [][]Bits
+type Room [][]Tile
 type Bits uint8
+type Tile struct {
+	Bits
+}
 
 func (b Bits) Clear(f Bits) Bits {
 	return b &^ f
@@ -25,7 +29,7 @@ const (
 func upsizeRoomTo(r Room, h int, w int) Room {
 	out := make(Room, h)
 	for i := 0; i < h; i++ {
-		out[i] = make([]Bits, w)
+		out[i] = make([]Tile, w)
 		if i >= len(r) {
 			continue
 		}
@@ -61,7 +65,7 @@ func (r Room) Stamp(rw int, cl int, bR Room) Room {
 	return out
 }
 
-func (r Room) Render() {
+func Render(r Room) {
 	for i := 0; i < len(r); i++ {
 		for j := 0; j < len(r[i]); j++ {
 			var tile rune
@@ -74,7 +78,7 @@ func (r Room) Render() {
 			if r[i][j].Has(Nothing) {
 				tile = ' '
 			}
-			cursor.PrintAt(tile, i+1, j+1)
+			cursor.PrintAt(string(tile), i+1, j+1)
 		}
 	}
 }
@@ -87,10 +91,10 @@ func MakeCircle(r int, fill Bits, stroke Bits) Room {
 		for col := range c[row] {
 			d := dist(col, row, r, r)
 			if d < float64(r) {
-				c[row][col] = fill
+				c[row][col] = Tile{Bits: fill}
 			}
 			if int(d) == r {
-				c[row][col] = stroke
+				c[row][col] = Tile{Bits: stroke}
 			}
 		}
 	}
@@ -102,11 +106,11 @@ func MakeRectangle(w int, h int, fill Bits, stroke Bits) Room {
 
 	for i := 0; i < h; i++ {
 		if i == 0 || i == h-1 {
-			out[i] = repeatBit(w, stroke)
+			out[i] = repeatBit(w, Tile{Bits: stroke})
 		} else {
-			tmp := repeatBit(w, fill)
-			tmp[0] = stroke
-			tmp[len(tmp)-1] = stroke
+			tmp := repeatBit(w, Tile{Bits: fill})
+			tmp[0] = Tile{Bits: stroke}
+			tmp[len(tmp)-1] = Tile{Bits: stroke}
 			out[i] = tmp
 		}
 
@@ -115,10 +119,42 @@ func MakeRectangle(w int, h int, fill Bits, stroke Bits) Room {
 	return out
 }
 
-func repeatBit(a int, b Bits) []Bits {
-	out := make([]Bits, a)
+func repeatBit(a int, b Tile) []Tile {
+	out := make([]Tile, a)
 	for i := 0; i < a; i++ {
 		out[i] = b
 	}
 	return out
+}
+
+func FromString(r string) Room {
+	w, h, cw := 0, 0, 0
+	r = strings.TrimSpace(r)
+
+	for _, char := range r {
+		if char == '\n' {
+			h++
+			cw = 0
+			continue
+		}
+
+		if cw > w {
+			w = cw
+		}
+		cw++
+	}
+
+	rm := make(Room, h+1)
+
+	for ri, rowStr := range strings.Split(r, "\n") {
+		rm[ri] = make([]Tile, w+1)
+		for ci, char := range rowStr {
+			if char == ' ' {
+				rm[ri][ci] = Tile{Bits: Walkable}
+			} else {
+				rm[ri][ci] = Tile{Bits: Wall}
+			}
+		}
+	}
+	return rm
 }

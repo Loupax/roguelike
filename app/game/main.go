@@ -39,8 +39,8 @@ func run() error {
 		Bits: room.Wall,
 	}
 
-	var b byte
-	r.Render()
+	var b rune
+	room.Render(r)
 	objs := room.Entities{
 		&room.Entity{
 			Row:  5,
@@ -97,7 +97,7 @@ func run() error {
 				cursor.Bell()
 			}
 		}
-		r.Render()
+		room.Render(r)
 		objs.Render()
 	}
 }

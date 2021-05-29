@@ -25,7 +25,7 @@ func main() {
 	c := room.MakeCircle(7, room.Walkable, room.Wall)
 	c = c.Stamp(4, 2, room.MakeRectangle(70, 7, room.Walkable, room.Wall))
 	c = c.Stamp(3, 69, room.MakeCircle(4, room.Walkable, room.Wall))
-	c.Render()
+	room.Render(c)
 	hero.Render()
 	cursor.MoveTo(10000, 0)
 }

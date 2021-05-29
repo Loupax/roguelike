@@ -7,10 +7,11 @@ import (
 )
 
 type Entity struct {
-	Row  int
-	Col  int
-	Bits Bits
-	Face rune
+	Row       int
+	Col       int
+	Bits      Bits
+	Face      rune
+	ColorCode int
 }
 
 type Entities []*Entity
@@ -40,5 +41,10 @@ func (os Entities) Render() {
 }
 func (o Entity) Render() {
 	cursor.MoveTo(o.Row+1, o.Col+1)
+	if o.ColorCode != 0 {
+		fmt.Printf(fmt.Sprintf("\033[%d;40m", o.ColorCode))
+		defer fmt.Printf("\033[0m")
+	}
+
 	fmt.Printf("%s", string(o.Face))
 }

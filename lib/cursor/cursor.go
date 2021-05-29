@@ -26,8 +26,8 @@ func Bell() {
 	fmt.Printf("\033\007")
 }
 
-func PrintAt(c rune, line, col int) {
+func PrintAt(c string, line, col int) {
 	fmt.Printf("\0337")
-	fmt.Printf("\033[%d;%dH%s", line, col, string(c))
+	fmt.Printf("\033[%d;%dH%s", line, col, c)
 	fmt.Printf("\0338")
 }
